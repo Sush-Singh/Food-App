@@ -1,3 +1,4 @@
+import { useContext, useLayoutEffect } from "react";
 import {
   Button,
   Image,
@@ -10,16 +11,32 @@ import { MEALS } from "../data/dummy-data";
 import MealDetails from "../components/MealDetails";
 import Subtitle from "../components/MealDetail/Subtitle";
 import List from "../components/MealDetail/List";
-import { useLayoutEffect } from "react";
 import IconButton from "../components/MealDetail/IconButton";
+import { useDispatch, useSelector } from "react-redux";
+import { addFavorite, removeFavorite } from "../store/redux/favorites";
+// import { FavoritesContext } from "../store/context/favorites-context";
 
 export default function MealDetailsScreen({ route, navigation }) {
+  // const favoriteMealsCtx = useContext(FavoritesContext);
+
+  const favoriteMealIds = useSelector((state) => state.favoriteMeals.ids);
+  const dispatch = useDispatch();
   const mealId = route.params.mealId;
 
   const mealData = MEALS.find((meal) => meal.id === mealId);
 
-  function headerButtonPressHandler() {
-    console.log("Pressed!");
+  // const mealIsFavorites = favoriteMealsCtx.ids.includes(mealId);
+
+  const mealIsFavorites = favoriteMealIds.includes(mealId);
+
+  function changeFavoritesStatusHandler() {
+    if (mealIsFavorites) {
+      // favoriteMealsCtx.removeFavorites(mealId);
+      dispatch(removeFavorite({ id: mealId }));
+    } else {
+      // favoriteMealsCtx.addFavorites(mealId);
+      dispatch(addFavorite({ id: mealId }));
+    }
   }
 
   useLayoutEffect(() => {
@@ -27,14 +44,14 @@ export default function MealDetailsScreen({ route, navigation }) {
       headerRight: () => {
         return (
           <IconButton
-            icon="star"
+            icon={mealIsFavorites ? "star" : "star-outline"}
             iconColor="white"
-            onPress={headerButtonPressHandler}
+            onPress={changeFavoritesStatusHandler}
           />
         );
       },
     });
-  }, [navigation, headerButtonPressHandler]);
+  }, [navigation, changeFavoritesStatusHandler]);
 
   return (
     <ScrollView style={styles.root}>
